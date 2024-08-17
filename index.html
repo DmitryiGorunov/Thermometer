@@ -1,0 +1,139 @@
+<html><head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Градусник хуядусник</title>
+    <style>body { background-color: #101010; font-family: Arial, Helvetica, Sans-Serif; Color: #008888; } </style>
+    <script type="text/javascript" src="js_chart.js"></script>
+  <script>
+    mydata_1= [ ];
+    mydata_2= [ ];
+    mydata_3= [ ];
+     mydata_4= [ ];
+      mydata_5= [ ];
+    mystyle_L1=["type=line"  , "linecolor=rgba(  255, 0, 0, 1  )", "fillcolor=rgba(  255,   0, 0, 0.3)", "linewidth=1"  , "beziercurve=true"];
+    mystyle_L2=["type=line"  , "linecolor=rgba(0,   125,   255, 1  )", "fillcolor=rgba(0,   125,   255, 0.3)", "linewidth=1"  , "beziercurve=true"];
+    mystyle_L3=["type=line"  , "linecolor=rgba(  0, 255,   0, 1  )", "fillcolor=rgba(  15, 255,   255, 0.3)", "linewidth=1"  , "beziercurve=true"];
+        mystyle_L4=["type=line"  , "linecolor=rgba(  255, 255,   0, 1  )", "fillcolor=rgba(  15, 255,   255, 0.3)", "linewidth=1"  , "beziercurve=true"];
+            mystyle_L5=["type=line"  , "linecolor=rgba(  255, 0,   255, 1  )", "fillcolor=rgba(  15, 255,   255, 0.3)", "linewidth=1"  , "beziercurve=true"];
+    style = [mystyle_L1, mystyle_L2, mystyle_L3, mystyle_L4, mystyle_L5];
+    data  = [mydata_1, mydata_2, mydata_3, mydata_4, mydata_5];
+    desc  = [];
+  </script>
+  </head>
+
+  
+
+  <body onresize="redrawAll()">
+
+    <center><div id="chart2a" style="width: 90%; height: 80%; position: relative"></div></td>
+
+
+
+
+
+    <script>
+      var dr2a= new js_chart('chart2a', data, style, desc, "t", [""] );
+      dr2a.drawaxis =false;
+      dr2a.margv = 10;
+      dr2a.margh = 10;
+      dr2a.marsize = 5;
+      dr2a.marw = 1.5;
+      dr2a.crHint   = true;
+      dr2a.crYjumpM = true;
+      dr2a.crYjumpP = true;
+      dr2a.crXjump  = true;
+			dr2a.hintfpx  = 12;
+      dr2a.canvasbkcol = "rgba(0,0,0,1)";
+      dr2a.axcol       = "rgba(155,155,155,1)";
+      dr2a.axdesccol   = "rgba(255,255, 0, 1)";
+      dr2a.descol      = "rgba(250,250,0,0.7)";
+      dr2a.drwfracol   = "rgba(150,150,150,0.5)";
+      dr2a.drwfilcol   = "rgba(50,50,50, 0.0)";
+      dr2a.mshcol      = "rgb(200,200,200, 0.5)";
+      dr2a.crlinecol   = "rgb(255, 255,255)";
+      dr2a.crlinewidth = 0.5;
+      dr2a.meshlw      = 0.5;
+      dr2a.descfpx     = 12;
+      dr2a.crXjump     = false;
+      dr2a.crYjumpM    = false;
+      dr2a.crYjumpP    = false;
+      dr2a.hintpointfill  = "rgba(0, 150, 150, 0.3)";
+      dr2a.hintlinecol    = "rgba(250, 250, 250, 1)";
+      dr2a.hintpointcolfromdraw = true; // new
+      dr2a.hintpointw     = 4;
+      dr2a.hintpointlwdth = 1;
+      dr2a.hintselectcol  = "rgba(200, 200, 200, 0.3)";
+      dr2a.hintzoomcol    = "rgba(0, 250, 250, 0.3)";
+      dr2a.hintwithctrl   = false;
+      dr2a.legend("top", ["temp °C", "hum %"        , "CO2 ppm", "vod_1","vod_2"]);
+      dr2a.vzonXaxis = true;
+      dr2a.from =  5;
+      dr2a.to   = 15
+            dr2a.Ymax = 100;
+              dr2a.Ymin = 0;
+              dr2a.Yzoom = true;
+      dr2a.draw();
+      document.body.scrollTop = 0;
+    </script>
+
+
+
+    <script>
+//var gateway = `ws://${window.location.hostname}/ws`;
+var gateway = `ws://192.168.88.127/ws`;
+var websocket;
+window.addEventListener('load', onload);
+
+function onload(event) {
+    initWebSocket();
+}
+
+function getReadings(){
+    websocket.send("getReadings");
+}
+
+function initWebSocket() {
+    console.log('Trying to open a WebSocket connection…');
+    websocket = new WebSocket(gateway);
+    websocket.onopen = onOpen;
+    websocket.onclose = onClose;
+    websocket.onmessage = onMessage;
+}
+
+function onOpen(event) {
+    console.log('Connection opened');
+    getReadings();
+}
+
+function onClose(event) {
+    console.log('Connection closed');
+    setTimeout(initWebSocket, 2000);
+}
+
+
+function onMessage(event) {
+    console.log(event.data);
+    var myObj = JSON.parse(event.data);
+    var keys = Object.keys(myObj);
+
+        mydata_1.push(myObj.t);
+        mydata_2.push(myObj.h);
+        mydata_3.push(myObj.p/10);
+        mydata_4.push(myObj.m1);
+        mydata_5.push(myObj.m2);
+        desc.push(myObj.time);
+
+
+
+
+
+
+      dr2a.legend("top", ["temp: "  + myObj.t + "°C  ", " hum: "+  + myObj.h +" % ", " CO2:" +  myObj.p + "ppm ", "Vlag_1 " + myObj.m1 + " % ","Vlag_2 " + myObj.m2 + " % " ]);
+
+        dr2a.update(data,style,desc);
+        // dr2a.redraw();
+}
+
+    </script>
+
+</center></center></center></body></html>
